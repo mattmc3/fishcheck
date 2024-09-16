@@ -1,4 +1,4 @@
-function FC1_1000 -d "Errors in Fish script. It fails the Fish parser."
+function FCE1000 -d "Errors in script. Script fails the Fish parser."
     set --local exitcode 0
     for fishfile in $argv
         set --local failure (fish --no-execute $fishfile 2>&1)
@@ -6,7 +6,7 @@ function FC1_1000 -d "Errors in Fish script. It fails the Fish parser."
             set exitcode 1
             _fishcheck_report \
                 --file $fishfile \
-                --check FC_1000 \
+                --check FCE1000 \
                 --severity error
         end
     end
