@@ -1,4 +1,4 @@
-function FCE1000 -d "Script errors, failing Fish parser."
+function FCE1000 -d "Fish syntax error. Unable to parse script."
     set -l exitcode 0
     for fishfile in $argv
         set -l failure (
