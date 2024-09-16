@@ -2,7 +2,7 @@
 
 function _fishcheck__version
     echo "fishcheck - Fish script analysis tool"
-    echo "version: 0.0.1"
+    echo "version: 0.0.1-alpha"
     echo "license: MIT"
     echo "website: https://github.com/brinysea/fishcheck"
 end
