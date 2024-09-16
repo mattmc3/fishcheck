@@ -1,0 +1,59 @@
+#!/usr/bin/env fish
+
+function _fishcheck__version
+    echo "fishcheck - Fish script analysis tool"
+    echo "version: 0.0.1"
+    echo "license: MIT"
+    echo "website: https://github.com/brinysea/fishcheck"
+end
+
+function _fishcheck__help
+    echo "Usage: fishcheck [OPTIONS...] FILES..."
+    echo "  -h, --help                     Show this usage summary and exit"
+    echo "  -v, --version                  Print version information"
+    echo "  -s, --severity=SEVERITY        Minimum severity for checks (default: error)"
+    echo "                                 Values: error, warning, info, style"
+end
+
+function _fishcheck_report
+    set --local optspec f/file= c/check= s/severity= n/lineno= l/line= S/start= \
+        E/end did-you-mean=
+
+    argparse $optspec -- $argv
+
+    # TODO:
+    echo "file: $_flag_file"
+    echo "check: $_flag_check"
+    echo "severity: $_flag_severity"
+    echo "line: $_flag_line"
+    echo "start/end: $_flag_start / $_flag_end"
+end
+
+function fishcheck
+    set --local fishcheck_version 0.0.1
+	set --local optspec h/help v/version s/severity=
+    argparse --name fishcheck $optspec -- $argv
+    or return 1
+
+    if set -q _flag_version
+        _fishcheck__version && return
+    else if set -q _flag_help
+        _fishcheck__help && return
+    else if test (count $argv) -eq 0
+        echo "fishcheck: No files specified. 'fishcheck -h' for help." >&2 && return 1
+    end
+
+    set --local checkfuncs
+    for checkfile in (path resolve (status dirname))/checks/*.fish
+        source $checkfile
+        set --append checkfuncs (path change-extension '' (path basename $checkfile))
+    end
+
+    for fishfile in $argv
+        for checkfunc in $checkfuncs
+            $checkfunc $fishfile
+        end
+    end
+end
+
+fishcheck $argv
