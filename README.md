@@ -26,4 +26,8 @@ git clone https://github.com/mattmc3/fishcheck ~/.local/bin/fishcheck
 fish_add_path -g --prepend ~/.local/bin/fishcheck
 ```
 
+## Checks
+
+To see this list of checks FishCheck performs, [click here](checks.md)
+
 [shellcheck]: https://www.shellcheck.net/
