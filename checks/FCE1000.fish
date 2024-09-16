@@ -1,13 +1,24 @@
-function FCE1000 -d "Errors in script. Script fails the Fish parser."
-    set --local exitcode 0
+function FCE1000 -d "Script errors, failing Fish parser."
+    set -l exitcode 0
     for fishfile in $argv
-        set --local failure (fish --no-execute $fishfile 2>&1)
+        set -l failure (
+            fish --no-execute $fishfile 2>&1 |
+                string replace -r -- '^warning:\s*.+$' '' |
+                string collect
+        )
         if test -n "$failure"
+            set -l errpat '^'$fishfile' \(line (\d+)\):\s*'
+            set -l lineno (string match -rg -- $errpat $failure)
+            if test $status -eq 0
+                set failure (string replace -r -- $errpat '' $failure | string collect)
+            end
+
             set exitcode 1
             _fishcheck_report \
                 --file $fishfile \
                 --check FCE1000 \
-                --severity error
+                --lineno $lineno \
+                --message $failure
         end
     end
     return $exitcode
