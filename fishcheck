@@ -15,9 +15,20 @@ function _fishcheck__help
     echo "                                 Severities: error, warning, info, style"
 end
 
+function _fishcheck_draw_line_pointer
+    if test (count $argv) -ne 2 || test $argv[1] -le 0 2>/dev/null || test $argv[2] -ne $argv[2] 2>/dev/null
+        return 1
+    end
+    echo -n (string pad -c ' ' -w $argv[1] '^')
+    if test $argv[2] -gt 1
+        echo -n (string pad -c '~' -w (math $argv[2] - 1) '^')
+    end
+    echo
+end
+
 function _fishcheck_report
     set -l optspec f/file= c/check= m/message= n/lineno= l/line= S/start= \
-        E/end did-you-mean=
+        L/length= did-you-mean=
 
     argparse $optspec -- $argv
 
@@ -46,26 +57,21 @@ function _fishcheck_report
     # check:
     echo "$check_color$_flag_check ($severity): $check_desc"(set_color normal)
     # file:
-    echo -n "file: $_flag_file"
     if test -n "$_flag_lineno"
-        echo -n " (line $_flag_lineno)"
+        echo "file: $_flag_file (line $_flag_lineno)"
+    else
+        echo "file: $_flag_file"
     end
-    echo
     # message:
     if set -q _flag_message
         echo "message: $_flag_message"
     end
-
-
-    # TODO:
-    # echo
-    # echo
-    # echo "TODO---------------------"
-    # echo "file: $_flag_file"
-    # echo "check: $_flag_check"
-    # echo "message: $_flag_message"
-    # echo "line: $_flag_line"
-    # echo "start/end: $_flag_start / $_flag_end"
+    if test -n "$_flag_line"
+        echo $_flag_line
+    end
+    if test -n "$_flag_start"
+        _fishcheck_draw_line_pointer $_flag_start $_flag_length
+    end
     echo
 end
 
@@ -86,12 +92,12 @@ function fishcheck
     set -l checkfuncs
     for checkfile in (path resolve (status dirname))/checks/*.fish
         source $checkfile
-        set -l checkfuncs (path change-extension '' (path basename $checkfile))
-        test $checkfuncs != FCE1000 || continue
-        set --append checkfuncs (path change-extension '' (path basename $checkfile))
+        set -l checkfunc (path change-extension '' (path basename $checkfile))
+        test $checkfunc = FCE1000 && continue
+        set --append checkfuncs $checkfunc
     end
 
-    # We always run FCE1000, but skip other checks on broken Fish files
+    # We always run FCE1000, but skip all other checks on broken Fish files
     set --local parsable_fishfile
     for fishfile in $argv
         FCE1000 $fishfile
