@@ -12,21 +12,61 @@ function _fishcheck__help
     echo "  -h, --help                     Show this usage summary and exit"
     echo "  -v, --version                  Print version information"
     echo "  -s, --severity=SEVERITY        Minimum severity for checks (default: error)"
-    echo "                                 Values: error, warning, info, style"
+    echo "                                 Severities: error, warning, info, style"
 end
 
 function _fishcheck_report
-    set --local optspec f/file= c/check= s/severity= n/lineno= l/line= S/start= \
+    set -l optspec f/file= c/check= m/message= n/lineno= l/line= S/start= \
         E/end did-you-mean=
 
     argparse $optspec -- $argv
 
+    set -l checkpat '^FC([EWIS])\d{4}'
+    if not string match -rq -- $checkpat $_flag_check
+        echo "fishcheck: Report expecting valid check ID with '--check' flag" >&2 && return 1
+    end
+    set -l check_sevcode (string match -rg -- $checkpat $_flag_check)
+    switch $check_sevcode
+        case E
+            set -f severity error
+            set -f check_color (set_color red)
+        case W
+            set -f severity warning
+            set -f check_color (set_color yellow)
+        case I
+            set -f severity info
+            set -f check_color (set_color green)
+        case S
+            set -f severity style
+            set -f check_color (set_color blue)
+    end
+
+    set -l check_desc (functions -Dv $_flag_check)[5]
+
+    # check:
+    echo "$check_color$_flag_check ($severity): $check_desc"(set_color normal)
+    # file:
+    echo -n "file: $_flag_file"
+    if test -n "$_flag_lineno"
+        echo -n " (line $_flag_lineno)"
+    end
+    echo
+    # message:
+    if set -q _flag_message
+        echo "message: $_flag_message"
+    end
+
+
     # TODO:
-    echo "file: $_flag_file"
-    echo "check: $_flag_check"
-    echo "severity: $_flag_severity"
-    echo "line: $_flag_line"
-    echo "start/end: $_flag_start / $_flag_end"
+    # echo
+    # echo
+    # echo "TODO---------------------"
+    # echo "file: $_flag_file"
+    # echo "check: $_flag_check"
+    # echo "message: $_flag_message"
+    # echo "line: $_flag_line"
+    # echo "start/end: $_flag_start / $_flag_end"
+    echo
 end
 
 function fishcheck
