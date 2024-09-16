@@ -70,8 +70,8 @@ function _fishcheck_report
 end
 
 function fishcheck
-    set --local fishcheck_version 0.0.1
-	set --local optspec h/help v/version s/severity=
+    set -l fishcheck_version 0.0.1
+    set -l optspec h/help v/version s/severity=
     argparse --name fishcheck $optspec -- $argv
     or return 1
 
@@ -83,13 +83,22 @@ function fishcheck
         echo "fishcheck: No files specified. 'fishcheck -h' for help." >&2 && return 1
     end
 
-    set --local checkfuncs
+    set -l checkfuncs
     for checkfile in (path resolve (status dirname))/checks/*.fish
         source $checkfile
+        set -l checkfuncs (path change-extension '' (path basename $checkfile))
+        test $checkfuncs != FCE1000 || continue
         set --append checkfuncs (path change-extension '' (path basename $checkfile))
     end
 
+    # We always run FCE1000, but skip other checks on broken Fish files
+    set --local parsable_fishfile
     for fishfile in $argv
+        FCE1000 $fishfile
+        test $status -eq 0 && set --append parsable_fishfile $fishfile
+    end
+
+    for fishfile in $parsable_fishfile
         for checkfunc in $checkfuncs
             $checkfunc $fishfile
         end
