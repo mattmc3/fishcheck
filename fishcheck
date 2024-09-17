@@ -1,0 +1,129 @@
+#!/usr/bin/env fish
+
+set -g fishcheck_version 0.0.1
+
+function _fishcheck__version
+    echo "fishcheck - Fish script analysis tool"
+    echo "version: $fishcheck_version-alpha"
+    echo "fish: fish $FISH_VERSION"
+    echo "license: MIT"
+    echo "website: https://github.com/mattmc3/fishcheck"
+end
+
+function _fishcheck__help
+    echo "Usage: fishcheck [OPTIONS...] FILES..."
+    echo "  -h, --help                     Show this usage summary and exit"
+    echo "  -v, --version                  Print version information"
+    echo "  -s, --severity=SEVERITY        Minimum severity for checks (default: error)"
+    echo "                                 Severities: error, warning, info, style"
+end
+
+function _fishcheck_draw_line_pointer
+    if test (count $argv) -ne 2 || test $argv[1] -le 0 2>/dev/null || test $argv[2] -ne $argv[2] 2>/dev/null
+        return 1
+    end
+    echo -n (string pad -c ' ' -w $argv[1] '^')
+    if test $argv[2] -gt 1
+        echo -n (string pad -c '~' -w (math $argv[2] - 1) '^')
+    end
+    echo
+end
+
+function _echo_section
+    echo (set_color --bold)$argv[1]": "(set_color normal)$argv[2..]
+end
+
+function _fishcheck_report
+    set --local check_color
+    set --local check_desc
+    set --local optspec f/file= c/check-id= s/severity= m/message= n/lineno= l/line= \
+        fix= S/start= L/length= did-you-mean=
+
+    argparse $optspec -- $argv
+    or begin
+        echo "Unexpected args for fishcheck report" >&2 && return 1
+    end
+
+    if not string match -rq -- '^FC\d{4}' $_flag_check_id
+        echo "fishcheck: Report expecting valid check ID with '--check-id' flag" >&2 && return 1
+    end
+
+    # Set the severity color
+    switch $_flag_severity
+        case error
+            set check_color (set_color red)
+        case warning
+            set check_color (set_color yellow)
+        case info
+            set check_color (set_color green)
+        case style
+            set check_color (set_color blue)
+    end
+
+    # Get the function description, and output the check ID header.
+    set check_desc (functions -Dv $_flag_check_id)[5]
+    echo "$check_color$_flag_check_id ($_flag_severity): $check_desc"(set_color normal)
+
+    # Show check details.
+    _echo_section docs https://github.com/mattmc3/fishcheck/wiki/$_flag_check_id
+    if test -n "$_flag_lineno"
+        _echo_section file "$_flag_file (line $_flag_lineno)"
+    else
+        _echo_section file $_flag_file
+    end
+    if set -q _flag_message
+        _echo_section message $_flag_message
+    end
+    if test -n "$_flag_line"
+        echo $_flag_line
+    end
+    if test -n "$_flag_start"
+        _fishcheck_draw_line_pointer $_flag_start $_flag_length
+    end
+    if test -n "$_flag_did_you_mean"
+        _echo_section "Did you mean?" (set_color cyan)$_flag_did_you_mean(set_color normal)
+    end
+    if test -n "$_flag_fix"
+        _echo_section fix (set_color cyan)$_flag_fix(set_color normal)
+    end
+    echo
+end
+
+function fishcheck
+    set --local checkfuncs
+    set --local checkfunc
+    set --local checkfile
+    set --local parsable_fishfile
+    set --local optspec h/help v/version
+    argparse --name fishcheck $optspec -- $argv
+    or return 1
+
+    if set -q _flag_version
+        _fishcheck__version && return
+    else if set -q _flag_help
+        _fishcheck__help && return
+    else if test (count $argv) -eq 0
+        echo "fishcheck: No files specified. 'fishcheck -h' for help." >&2 && return 1
+    end
+
+    for checkfile in (path resolve (status dirname))/checks/*.fish
+        source $checkfile
+        set checkfunc (path change-extension '' (path basename $checkfile))
+        test $checkfunc = FC1000 && continue
+        set --append checkfuncs $checkfunc
+    end
+
+    # We always run FC1000 first, and skip all other checks if this core check fails
+    for fishfile in $argv
+        FC1000 $fishfile
+        test $status -eq 0 && set --append parsable_fishfile $fishfile
+    end
+
+    for fishfile in $parsable_fishfile
+        for checkfunc in $checkfuncs
+            $checkfunc $fishfile
+        end
+    end
+end
+
+fishcheck $argv
