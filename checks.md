@@ -14,6 +14,13 @@
 | [FCS4000] | style    | Run fish_indent.                                       | :white_check_mark: |
 
 
+## Checks that must be enabled
+
+| check     | severity | description                                            | implemented        |
+| --------- | -------- | ------------------------------------------------------ | ------------------ |
+| [FCS5000] | style    | Found bash-ism. Use test, not square brackets.         | :x:                |
+
+
 [FCE1000]: https://github.com/mattmc3/fishcheck/wiki/FCE1000
 [FCE1001]: https://github.com/mattmc3/fishcheck/wiki/FCE1001
 [FCE1002]: https://github.com/mattmc3/fishcheck/wiki/FCE1002
