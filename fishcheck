@@ -74,7 +74,7 @@ function _fishcheck_report
         _fishcheck_draw_line_pointer $_flag_start $_flag_length
     end
     if test -n "$_flag_did_you_mean"
-        echo "Did you mean? '$_flag_did_you_mean'"
+        echo "Did you mean? "(set_color cyan)$_flag_did_you_mean(set_color normal)
     end
     echo
 end
