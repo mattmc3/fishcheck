@@ -1,4 +1,4 @@
-function FCE1010 -d "Found bash-ism ';then'"
+function FCE1010 -d "Found bash-ism ';then'."
     set -l exitcode 0
     set -l re_then '(;?\s*then)\s*(\#.*)?$'
     for fishfile in $argv
