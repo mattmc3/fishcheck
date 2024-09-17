@@ -6,7 +6,7 @@ function FC1001 -d "Run fish_indent."
     set --local newcontents
 
     # Every FishCheck needs to report on itself
-    argparse 's/severity' -- $argv
+    argparse s/severity -- $argv
     or return 1
     if set -q _flag_severity
         echo $severity && return

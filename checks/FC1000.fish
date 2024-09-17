@@ -7,7 +7,7 @@ function FC1000 -d "Fish syntax error. Unable to parse script."
     set --local fishfile
 
     # Every FishCheck needs to report on itself
-    argparse 's/severity' -- $argv
+    argparse s/severity -- $argv
     or return 1
     if set -q _flag_severity
         echo $severity && return

@@ -36,7 +36,7 @@ end
 function _fishcheck_report
     set --local check_color
     set --local check_desc
-    set --local optspec f/file= c/check-id= s/severity= m/message= n/lineno= l/line= \
+    set --local optspec f/file= "c/check-id=" s/severity= m/message= n/lineno= l/line= \
         fix= S/start= L/length= did-you-mean=
 
     argparse $optspec -- $argv

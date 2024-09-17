@@ -4,11 +4,11 @@ function FC1002 -d "Use '#!/usr/bin/env fish' for Fish's shebang."
     set --local shebang
 
     # Every FishCheck needs to report on itself
-    argparse 's/severity' -- $argv
+    argparse s/severity -- $argv
     or return 1
     if set -q _flag_severity
         # could be warning, could be error - say error
-        echo "error" && return
+        echo error && return
     end
 
     for fishfile in $argv
