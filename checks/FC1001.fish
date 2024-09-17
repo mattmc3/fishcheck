@@ -1,4 +1,4 @@
-function FC1001 -d "Run fish_indent."
+function FC1001 -d "Run fish_indent"
     set --local severity warning
     set --local exitcode 0
     set --local fishfile

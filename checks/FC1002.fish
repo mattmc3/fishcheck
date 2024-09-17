@@ -1,4 +1,4 @@
-function FC1002 -d "Use '#!/usr/bin/env fish' for Fish's shebang."
+function FC1002 -d "Use '#!/usr/bin/env fish' for Fish's shebang"
     set --local exitcode 0
     set --local fishfile
     set --local shebang
