@@ -56,6 +56,7 @@ function _fishcheck_report
 
     # check:
     echo "$check_color$_flag_check ($severity): $check_desc"(set_color normal)
+    echo "link: https://github.com/mattmc3/fishcheck/wiki/$_flag_check"
     # file:
     if test -n "$_flag_lineno"
         echo "file: $_flag_file (line $_flag_lineno)"
