@@ -23,7 +23,7 @@ function FC1002 -d "Use '#!/usr/bin/env fish' for Fish's shebang."
                 --lineno 1 \
                 --message "Use #!, not !#, for the shebang." \
                 -S 1 -L 2
-        else if string match -rq -- '^#!' $shebang
+        else if string match -rq -- '^#\s*!\s*\/' $shebang
             if test "$shebang" != "#!/usr/bin/env fish"
                 set exitcode 1
                 _fishcheck_report \
