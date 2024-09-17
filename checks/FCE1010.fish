@@ -6,7 +6,7 @@ function FCE1010 -d "Found bash-ism ';then'."
         while read -l line
             set lineno (math $lineno + 1)
             echo $line | read -lat tokens
-            if test $tokens[1] = "if" -o $tokens[1] = "else" && test $tokens[-1] = "then"
+            if test "$tokens[1]" = "if" -o "$tokens[1]" = "else" && test "$tokens[-1]" = "then"
                 set -l position (string match -rng -- $re_then $line | string split ' ')
                 test $status -eq 0 || set position 0 0
                 set exitcode 1
